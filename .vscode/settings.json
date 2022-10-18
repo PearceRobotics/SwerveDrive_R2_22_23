@@ -26,5 +26,7 @@
     }
   ],
   "java.test.defaultConfig": "WPIlibUnitTests",
-  "spellright.addToSystemDictionary": true
+  "spellright.addToSystemDictionary": true,
+  "spellright.language": ["en"],
+  "spellright.documentTypes": ["markdown", "latex", "plaintext", "java"]
 }

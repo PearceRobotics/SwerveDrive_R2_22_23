@@ -18,11 +18,11 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.SwerveConstants;
 
 public class SwerveDrive extends SubsystemBase {
-    private Gyroscope gyroscope;
+  private Gyroscope gyroscope;
   private Encoder turningEncoder;
   private Encoder driveEncoder;
 
-    /**
+  /**
    * The maximum voltage that will be delivered to the drive motors.
    *
    * <p>This can be reduced to cap the robot's maximum speed. Typically, this is useful during
@@ -47,7 +47,7 @@ public class SwerveDrive extends SubsystemBase {
           * SdsModuleConfigurations.MK4I_L1.getDriveReduction()
           * SdsModuleConfigurations.MK4I_L1.getWheelDiameter()
           * Math.PI;
-    /**
+  /**
    * The maximum angular velocity of the robot in radians per second.
    *
    * <p>This is a measure of how fast the robot can rotate in place.
@@ -55,40 +55,48 @@ public class SwerveDrive extends SubsystemBase {
   // Here we calculate the theoretical maximum angular velocity. You can also replace this with a
   // measured amount.
   public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND =
-  MAX_VELOCITY_METERS_PER_SECOND
-      / Math.hypot(
+      MAX_VELOCITY_METERS_PER_SECOND
+          / Math.hypot(
+              SwerveConstants.DRIVETRAIN_TRACKWIDTH_METERS / 2.0,
+              SwerveConstants.DRIVETRAIN_WHEELBASE_METERS / 2.0);
+
+  // Locations for the swerve drive modules relative to the robot center.
+  Translation2d m_frontLeftLocation =
+      new Translation2d(
           SwerveConstants.DRIVETRAIN_TRACKWIDTH_METERS / 2.0,
-          SwerveConstants.DRIVETRAIN_WHEELBASE_METERS / 2.0);
+          SwerveConstants.DRIVETRAIN_WHEELBASE_METERS / 2.0); // recalculate
+  Translation2d m_frontRightLocation =
+      new Translation2d(
+          SwerveConstants.DRIVETRAIN_TRACKWIDTH_METERS / 2.0,
+          -SwerveConstants.DRIVETRAIN_WHEELBASE_METERS / 2.0); // recalculate
+  Translation2d m_backLeftLocation =
+      new Translation2d(
+          -SwerveConstants.DRIVETRAIN_TRACKWIDTH_METERS / 2.0,
+          SwerveConstants.DRIVETRAIN_WHEELBASE_METERS / 2.0); // recalculate
+  Translation2d m_backRightLocation =
+      new Translation2d(
+          -SwerveConstants.DRIVETRAIN_TRACKWIDTH_METERS / 2.0,
+          -SwerveConstants.DRIVETRAIN_WHEELBASE_METERS / 2.0); // recalculate
 
-     //Locations for the swerve drive modules relative to the robot center.
-     Translation2d m_frontLeftLocation = new Translation2d( SwerveConstants.DRIVETRAIN_TRACKWIDTH_METERS / 2.0,
-     SwerveConstants.DRIVETRAIN_WHEELBASE_METERS / 2.0); // recalculate
-     Translation2d m_frontRightLocation = new Translation2d(SwerveConstants.DRIVETRAIN_TRACKWIDTH_METERS / 2.0,
-     -SwerveConstants.DRIVETRAIN_WHEELBASE_METERS / 2.0); // recalculate
-     Translation2d m_backLeftLocation = new Translation2d(-SwerveConstants.DRIVETRAIN_TRACKWIDTH_METERS / 2.0,
-     SwerveConstants.DRIVETRAIN_WHEELBASE_METERS / 2.0); // recalculate
-     Translation2d m_backRightLocation = new Translation2d(-SwerveConstants.DRIVETRAIN_TRACKWIDTH_METERS / 2.0,
-     -SwerveConstants.DRIVETRAIN_WHEELBASE_METERS / 2.0); // recalculate
+  private final SwerveDriveKinematics m_kinematics =
+      new SwerveDriveKinematics(
+          // Front left
+          m_frontLeftLocation,
+          // Front right
+          m_frontRightLocation,
+          // Back left
+          m_backLeftLocation,
+          // Back right
+          m_backRightLocation);
 
-private final SwerveDriveKinematics m_kinematics =
-  new SwerveDriveKinematics(
-      // Front left
-      m_frontLeftLocation,
-      // Front right
-      m_frontRightLocation,
-      // Back left
-      m_backLeftLocation,
-      // Back right
-      m_backRightLocation);
-
-// Creating my odometry object from the kinematics object. Here,
+  // Creating my odometry object from the kinematics object. Here,
   // our starting pose is 5 meters along the long end of the field and in the
   // center of the field along the short end, facing forward.
   SwerveDriveOdometry m_odometry =
       new SwerveDriveOdometry(
           m_kinematics, this.gyroscope.getRotation2d(), new Pose2d(5.0, 13.5, new Rotation2d()));
 
-// These are our modules. We initialize them in the constructor.
+  // These are our modules. We initialize them in the constructor.
   private final SwerveModule m_frontLeftModule;
   private final SwerveModule m_frontRightModule;
   private final SwerveModule m_backLeftModule;
@@ -213,7 +221,6 @@ private final SwerveDriveKinematics m_kinematics =
     SwerveModuleState[] moduleStates = m_kinematics.toSwerveModuleStates(SwerveSpeeds);
   }
 
-
   public void robotModuleStates() {
     // Example module states
     var frontLeftState = new SwerveModuleState(23.43, Rotation2d.fromDegrees(-140.19));
@@ -232,8 +239,6 @@ private final SwerveDriveKinematics m_kinematics =
     double angular = chassisSpeeds.omegaRadiansPerSecond;
   }
 
-
-
   public Rotation2d getGyroscopeRotation() {
     if (gyroscope.isMagnetometerCalibrated()) {
       // We will only get valid fused headings if the magnetometer is calibrated
@@ -245,7 +250,6 @@ private final SwerveDriveKinematics m_kinematics =
     return Rotation2d.fromDegrees(360.0 - gyroscope.getYaw());
   }
 
-
   public void setDesiredStates(SwerveModuleState[] newStates) {
     moduleStates = newStates;
   }
@@ -254,24 +258,20 @@ private final SwerveDriveKinematics m_kinematics =
     this.m_odometry.resetPosition(pose2d, this.gyroscope.getRotation2d());
   }
 
-
   public void drive(ChassisSpeeds chassisSpeeds) {
     m_chassisSpeeds = chassisSpeeds;
   }
 
-
-    /**
+  /**
    * Returns the current state of the module.
    *
-   * @return The current state of the module.
-   * Might neeed to change driveEncoder to actual encoder counting the rotations(speed) of wheels
+   * @return The current state of the module. Might need to change driveEncoder to actual encoder
+   *     counting the rotations(speed) of wheels
    */
   public SwerveModuleState getState() {
     return new SwerveModuleState(
         driveEncoder.getRate(), new Rotation2d(this.gyroscope.getGyroAngle()));
   }
-
-
 
   public void periodic() {
     SwerveDriveKinematics.desaturateWheelSpeeds(moduleStates, MAX_VELOCITY_METERS_PER_SECOND);
@@ -289,6 +289,4 @@ private final SwerveDriveKinematics m_kinematics =
         moduleStates[3].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
         moduleStates[3].angle.getRadians());
   }
-
-  }  
-
+}

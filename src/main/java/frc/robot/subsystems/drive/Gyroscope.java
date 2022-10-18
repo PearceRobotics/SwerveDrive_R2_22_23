@@ -78,9 +78,7 @@ public class Gyroscope extends SubsystemBase {
 
   /**
    * Informs the gyro of a rotation seen via wheel odometry. Only impacts last known heading, in
-   * case of gyro dropout
-   *
-   * @param offset
+   * case of gyro dropout @PARAM offset
    */
   public void rotationFromWheelOdometry(Rotation2d offset) {
     // Add manually by degrees since the methods clamp to (0, 360)
